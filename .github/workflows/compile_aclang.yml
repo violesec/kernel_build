@@ -7,7 +7,7 @@
 # Description: Build MIUI Kernel using GitHub Actions
 #
 
-name: Build Kernel (Vortex-Clang)
+name: Build Kernel (Azure-Clang)
 
 on:
   repository_dispatch:
@@ -31,8 +31,8 @@ env:
   UPLOAD_RELEASE: true
   REPO_URL: https://github.com/violesec/android_kernel_xiaomi_mt6768.git
   REPO_BRANCH: tester
-  TOOLCHAIN_URL: https://github.com/Viole403/toolchain.git
-  TOOLCHAIN_BRANCH: vortex
+  TOOLCHAIN_URL: https://gitlab.com/Panchajanya1999/azure-clang
+  TOOLCHAIN_BRANCH: main
   CONFIG_FILE: .config
   EXTERNAL_URL: https://github.com/violesec/kernel_build.git
   ANYKERNEL_URL: https://github.com/violesec/anykernel-lance.git 
@@ -113,7 +113,7 @@ jobs:
       run: |
         chmod +x ./compile.sh
         bash ./compile.sh
-        ls /workdir/kernel/out/arch/arm64/boot/
+        # ls /workdir/kernel/out/arch/arm64/boot/
     
     - name: Pack Kernel
       working-directory: /workdir
