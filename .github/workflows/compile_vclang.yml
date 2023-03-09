@@ -45,7 +45,6 @@ env:
   CCACHE_DIR: ~/.ccache
   BUILDER: /workdir/toolchain/bin/
   
-
 jobs:
   build:
     runs-on: ubuntu-20.04
@@ -114,7 +113,7 @@ jobs:
       run: |
         chmod +x ./compile.sh
         bash ./compile.sh
-        cd /workdir/kernel/out/arch/arm64/boot/
+        ls /workdir/kernel/out/arch/arm64/boot/
     
     - name: Pack Kernel
       working-directory: /workdir
