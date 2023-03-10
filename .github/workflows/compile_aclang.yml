@@ -120,19 +120,33 @@ jobs:
 #       run: |
 #         cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/Image-dtb
         
-    - name: Upload Boot Kernel Directory
+#     - name: Upload Boot Kernel Directory
+#       uses: actions/upload-artifact@main
+#       with:
+#         working-directory: /workdir/kernel
+#         name: Nimow_${{ env.DEVICE }}
+#         path: /workdir/kernel/out/arch/arm64/boot/
+
+    - name: Just LS Directory
+      working-directory: /workdir/kernel
+      run: |
+        ls /workdir/kernel
+        ls /workdir/kernel/out
+        ls /workdir/kernel/out/arch/arm64/boot/
+
+    - name: Upload Out Kernel Directory
       uses: actions/upload-artifact@main
       with:
         working-directory: /workdir/kernel
         name: Nimow_${{ env.DEVICE }}
-        path: /workdir/kernel/out/arch/arm64/boot/
+        path: /workdir/kernel/out/
         
-    - name: Upload Kernel Patcher
-      uses: actions/upload-artifact@main
-      with:
-        working-directory: /workdir
-        name: Nimow_${{ env.DEVICE }}_Anykernel
-        path: /workdir/anykernel/
+#     - name: Upload Kernel Patcher
+#       uses: actions/upload-artifact@main
+#       with:
+#         working-directory: /workdir
+#         name: Nimow_${{ env.DEVICE }}_Anykernel
+#         path: /workdir/anykernel/
        
     - name: Delete workflow runs
       uses: GitRML/delete-workflow-runs@main
