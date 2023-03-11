@@ -118,7 +118,7 @@ jobs:
     - name: Tar Directory
       working-directory: /workdir/kernel
       run: |
-        tar -zcvf Nimow_Kernel_${{ env.DEVICE }}_Out.tar.gz /workdir/kernel/out/
+        tar -zcvf Nimow_Kernel_Out.tar.gz /workdir/kernel/out/
     
 #     - name: Pack Kernel
 #       working-directory: /workdir
@@ -137,7 +137,7 @@ jobs:
       with:
         working-directory: /workdir/kernel
         name: Nimow_${{ env.DEVICE }}
-        path: Nimow_Kernel_${{ env.DEVICE }}_Out.tar.gz
+        path: Nimow_Kernel_Out.tar.gz
 #         path: /workdir/kernel/out/
         
 #     - name: Upload Kernel Patcher
