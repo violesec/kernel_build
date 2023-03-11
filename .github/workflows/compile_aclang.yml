@@ -114,6 +114,11 @@ jobs:
         chmod +x ./compile.sh
         bash ./compile.sh
         # ls /workdir/kernel/out/arch/arm64/boot/
+        
+    - name: Tar Directory
+      working-directory: /workdir/kernel
+      run: |
+        tar -zcvf Nimow_Kernel_${{ env.DEVICE }}_Out.tar.gz /workdir/kernel/out/
     
 #     - name: Pack Kernel
 #       working-directory: /workdir
@@ -132,7 +137,8 @@ jobs:
       with:
         working-directory: /workdir/kernel
         name: Nimow_${{ env.DEVICE }}
-        path: /workdir/kernel/out/
+        path: Nimow_Kernel_${{ env.DEVICE }}_Out.tar.gz
+#         path: /workdir/kernel/out/
         
 #     - name: Upload Kernel Patcher
 #       uses: actions/upload-artifact@main
