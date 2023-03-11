@@ -142,7 +142,7 @@ jobs:
       with:
         working-directory: /workdir/kernel
         name: Nimow_Kernel
-        path: /workdir/kernel/out/Nimow_Kernel_Out.tar.gz
+        path: /workdir/kernel/Nimow_Kernel_Out.tar.gz
 #         path: /workdir/kernel/out/
         
 #     - name: Upload Kernel Patcher
