@@ -30,12 +30,15 @@ env:
   UPLOAD_BIN_DIR: true
   UPLOAD_RELEASE: true
   REPO_URL: https://github.com/violesec/android_kernel_xiaomi_mt6768.git
-  REPO_BRANCH: kernelSU
+  REPO_BRANCH: upstream
   TOOLCHAIN_URL: https://gitlab.com/Panchajanya1999/azure-clang
   TOOLCHAIN_BRANCH: main
   CONFIG_FILE: .config
   EXTERNAL_URL: https://github.com/violesec/kernel_build.git
-  ANYKERNEL_URL: https://github.com/violesec/anykernel-lance.git 
+  ANYKERNEL_URL: https://github.com/violesec/anykernel-lance.git
+  ANYKERNEL_BRANCH: main
+  MKBOOTIMG_URL: https://android.googlesource.com/platform/system/tools/mkbootimg.git
+  MKBOOTIMG_BRANCH: master-kernel-build-2022
   TZ: Asia/Jakarta
   ARCH: arm64
   SUBARCH: arm64
@@ -115,45 +118,45 @@ jobs:
         bash ./compile.sh
         # ls /workdir/kernel/out/arch/arm64/boot/
         
-    - name: Tar Directory
-      working-directory: /workdir/kernel
-      run: |
-        tar -zcvf Nimow_Kernel_Out.tar.gz /workdir/kernel/out/
-    
-#     - name: Pack Kernel
-#       working-directory: /workdir
+#     - name: Tar Directory
+#       working-directory: /workdir/kernel
 #       run: |
-#         cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/Image-dtb
-        
-#     - name: Upload Boot Kernel Directory
-#       uses: actions/upload-artifact@main
-#       with:
-#         working-directory: /workdir/kernel
-#         name: Nimow_${{ env.DEVICE }}
-#         path: /workdir/kernel/out/arch/arm64/boot/
-
-    - name: Just List Directory
-      working-directory: /workdir/kernel
+#         tar -zcvf Nimow_Kernel_Out.tar.gz /workdir/kernel/out/
+    
+    - name: Pack Kernel
+      working-directory: /workdir
       run: |
-        ls /workdir/kernel/out/
-
-    - name: Upload Out Kernel Directory
+        cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/Image-gz.dtb
+        
+    - name: Upload Boot Kernel Directory
       uses: actions/upload-artifact@main
       with:
         working-directory: /workdir/kernel
-        name: Nimow_Kernel
-        path: /workdir/kernel/Nimow_Kernel_Out.tar.gz
-#         path: /workdir/kernel/out/
-        
-#     - name: Upload Kernel Patcher
+        name: Nimow_${{ env.DEVICE }}
+        path: /workdir/kernel/out/arch/arm64/boot/
+
+#     - name: Just List Directory
+#       working-directory: /workdir/kernel
+#       run: |
+#         ls /workdir/kernel/out/
+
+#     - name: Upload Out Kernel Directory
 #       uses: actions/upload-artifact@main
 #       with:
-#         working-directory: /workdir
-#         name: Nimow_${{ env.DEVICE }}_Anykernel
-#         path: /workdir/anykernel/
+#         working-directory: /workdir/kernel
+#         name: Nimow_Kernel
+#         path: /workdir/kernel/Nimow_Kernel_Out.tar.gz
+# #         path: /workdir/kernel/out/
+        
+    - name: Upload Kernel Patcher
+      uses: actions/upload-artifact@main
+      with:
+        working-directory: /workdir
+        name: Nimow_${{ env.DEVICE }}_Anykernel
+        path: /workdir/anykernel/
        
-#     - name: Delete workflow runs
-#       uses: GitRML/delete-workflow-runs@main
-#       with:
-#         retain_days: 1
-#         keep_minimum_runs: 3
+    - name: Delete workflow runs
+      uses: GitRML/delete-workflow-runs@main
+      with:
+        retain_days: 1
+        keep_minimum_runs: 3
