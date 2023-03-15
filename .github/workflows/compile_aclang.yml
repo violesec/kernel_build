@@ -119,7 +119,7 @@ jobs:
     - name: Pack Kernel
       working-directory: /workdir
       run: |
-        cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/Image-dtb
+        cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/
         
     - name: Upload Kernel directory
       uses: actions/upload-artifact@main
