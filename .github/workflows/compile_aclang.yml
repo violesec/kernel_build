@@ -41,10 +41,7 @@ env:
   ARCH: arm64
   SUBARCH: arm64
   DEVICE: lancelot
-  DEVICE_DEFCONFIG: lancelot_defconfig
-  USE_KERNELSU: true
-  USE_KPROBES: false
-  USE_OVERLAYFS: false
+  DEVICE_FULL: lancelot_defconfig
   USE_CCACHE: 1
   CCACHE_DIR: ~/.ccache
   BUILDER: /workdir/toolchain/bin/
@@ -71,10 +68,6 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-      - name: Get current date
-        id: date
-        run: echo "::set-output name=date::$(date +'%d-%m-%Y')"
-
     - name: Clone source code
       working-directory: /workdir
       run: |
@@ -97,30 +90,15 @@ jobs:
       working-directory: /workdir/kernel
       if: (github.event.inputs.kernelsu == 'true' && github.event.inputs.kernelsu  != 'false') || contains(github.event.action, 'kernelsu')
       run: |
-        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
-        # if [ ${{ env.USE_KPROBES }} = true ]; then
-        #     echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        #     echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        #     echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        #     echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        # fi
-        # if [ ${{ env.USE_OVERLAYFS }} = true ]; then
-        #     echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        # fi
-        # if [ ${{ env.DISABLE-LTO }} = true ]; then
-        #     sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        #     sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        #     sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        #     echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        # fi
+       curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
         
     - name: Kernel Custom Script (${{github.event.inputs.custom}})
       working-directory: /workdir
       if: (github.event.inputs.custom == 'true' && github.event.inputs.custom  != 'false') || contains(github.event.action, 'custom')
       run: |
-        cp ./extra/custom.sh ./kernel/
-        chmod +x ./kernel/custom.sh
-        bash ./kernel/custom.sh
+       cp ./extra/custom.sh ./kernel/
+       chmod +x ./kernel/custom.sh
+       bash ./kernel/custom.sh
         
     - name: SSH connection to Actions (${{github.event.inputs.ssh}})
       uses: P3TERX/ssh2actions@v1.0.0
@@ -129,50 +107,36 @@ jobs:
     - name: Set Device
       working-directory: /workdir/kernel
       run: |
-        make O=out ARCH=$ARCH $DEVICE_DEFCONFIG
+        make O=out ARCH=$ARCH $DEVICE_FULL
 
     - name: Compile Source
       working-directory: /workdir/kernel
       run: |
         chmod +x ./compile.sh
         bash ./compile.sh
-        ls /workdir/kernel/out/arch/arm64/boot/
-
-    # - name: Env Preperation
-    #   run: |
-    #     # TZ='${{ env.TZ }}' date +''%d/%m/%y'
-    #     make kernelversion
-    #     echo "KERNEL_VERSION=$(make kernelversion | head -n 1)"" >> $GITHUB_ENV
-    #     echo "CLANG_VERSION="$(clang --version | head -n 1)"" >> $GITHUB_ENV
-    #     echo "KERNEL_NAME="$(cat arch/arm64/configs/${{ env.DEVICE }}_defconfig | grep "CONFIG_LOCALVERSION\=" | sed -r 's/.*"(.+)".*/\1/' | sed 's/^.//')"" >> $GITHUB_ENV
-
+        # ls /workdir/kernel/out/arch/arm64/boot/
+    
     - name: Pack Kernel
-      # working-directory: /workdir
+      working-directory: /workdir
       run: |
-        # cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/
-        if [[ -f out/arch/arm64/boot/Image.gz-dtb ]]; then
-          cp out/arch/arm64/boot/Image.gz-dtb ./anykernel/Image.gz-dtb
-        elif [[ -f out/arch/arm64/boot/Image-dtb ]]; then
-          cp out/arch/arm64/boot/Image-dtb ./anykernel/Image-dtb
-        elif [[ -f out/arch/arm64/boot/Image.gz ]]; then
-          cp out/arch/arm64/boot/Image.gz ./anykernel/Image.gz
-        elif [[ -f out/arch/arm64/boot/Image ]]; then
-          cp out/arch/arm64/boot/Image ./anykernel/Image
-        fi
-        if [ -f out/arch/arm64/boot/dtbo.img ]; then
-          cp out/arch/arm64/boot/dtbo.img ./anykernel/dtbo.img
-        fi
+        cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/
         
     - name: Upload Kernel directory
       uses: actions/upload-artifact@main
       with:
         working-directory: /workdir/kernel
-        name: Nimow_Kernel_${{ env.DEVICE }}_Boot
+        name: Nimow_Kernel_${{ env.DEVICE }}_TESTFiles
         path: /workdir/kernel/out/arch/arm64/boot/
         
     - name: Upload Kernel Patcher
       uses: actions/upload-artifact@main
       with:
         working-directory: /workdir
-        name: [${{ steps.date.outputs.date }}]Nimow_Kernel_${{ env.DEVICE }}-${{ github.sha }}
+        name: Nimow_Kernel_${{ env.DEVICE }}_Anykernel
         path: /workdir/anykernel/
+       
+#     - name: Delete workflow runs
+#       uses: GitRML/delete-workflow-runs@main
+#       with:
+#         retain_days: 1
+#         keep_minimum_runs: 3
