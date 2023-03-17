@@ -1,4 +1,5 @@
-name: Build Kernel (Azure-Clang) - 
+# Nyahahaha
+name: Build Kernel (Azure-Clang)
 
 on:
   repository_dispatch:
