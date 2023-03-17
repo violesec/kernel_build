@@ -98,21 +98,21 @@ jobs:
       if: (github.event.inputs.kernelsu == 'true' && github.event.inputs.kernelsu  != 'false') || contains(github.event.action, 'kernelsu')
       run: |
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
-        if [ ${{ env.USE_KPROBES }} = true ]; then
-            echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-            echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-            echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-            echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        fi
-        if [ ${{ env.USE_OVERLAYFS }} = true ]; then
-            echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        fi
-        if [ ${{ env.DISABLE-LTO }} = true ]; then
-            sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-            sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-            sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-            echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        fi
+        # if [ ${{ env.USE_KPROBES }} = true ]; then
+        #     echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        #     echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        #     echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        #     echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        # fi
+        # if [ ${{ env.USE_OVERLAYFS }} = true ]; then
+        #     echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        # fi
+        # if [ ${{ env.DISABLE-LTO }} = true ]; then
+        #     sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        #     sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        #     sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        #     echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        # fi
         
     - name: Kernel Custom Script (${{github.event.inputs.custom}})
       working-directory: /workdir
@@ -138,13 +138,13 @@ jobs:
         bash ./compile.sh
         ls /workdir/kernel/out/arch/arm64/boot/
 
-    - name: Env Preperation
-      run: |
-        # TZ='${{ env.TZ }}' date +''%d/%m/%y'
-        make kernelversion
-        echo "KERNEL_VERSION=$(make kernelversion | head -n 1)"" >> $GITHUB_ENV
-        echo "CLANG_VERSION="$(clang --version | head -n 1)"" >> $GITHUB_ENV
-        echo "KERNEL_NAME="$(cat arch/arm64/configs/${{ env.DEVICE }}_defconfig | grep "CONFIG_LOCALVERSION\=" | sed -r 's/.*"(.+)".*/\1/' | sed 's/^.//')"" >> $GITHUB_ENV
+    # - name: Env Preperation
+    #   run: |
+    #     # TZ='${{ env.TZ }}' date +''%d/%m/%y'
+    #     make kernelversion
+    #     echo "KERNEL_VERSION=$(make kernelversion | head -n 1)"" >> $GITHUB_ENV
+    #     echo "CLANG_VERSION="$(clang --version | head -n 1)"" >> $GITHUB_ENV
+    #     echo "KERNEL_NAME="$(cat arch/arm64/configs/${{ env.DEVICE }}_defconfig | grep "CONFIG_LOCALVERSION\=" | sed -r 's/.*"(.+)".*/\1/' | sed 's/^.//')"" >> $GITHUB_ENV
 
     - name: Pack Kernel
       # working-directory: /workdir
