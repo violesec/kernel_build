@@ -1,4 +1,12 @@
-# Nyahahaha
+#
+# Copyright (c) 2022-2023 SkyFaklist
+#
+# This is free software, licensed under the GPL License.
+# See /LICENSE for more information.
+#
+# Description: Build MIUI Kernel using GitHub Actions
+#
+
 name: Build Kernel (Azure-Clang)
 
 on:
