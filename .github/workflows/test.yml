@@ -146,5 +146,6 @@ jobs:
       uses: actions/upload-artifact@main
       with:
         # working-directory: /workdir
-        name: [${{ steps.get_date.outputs.date }}]Suisei_Kernel_${{ env.DEVICE }}
+#         name: [${{ steps.get_date.outputs.date }}]Suisei_Kernel_${{ env.DEVICE }}
+        name: Kernel_Nimow_Anykernel
         path: /workdir/anykernel/
