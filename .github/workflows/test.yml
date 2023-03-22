@@ -22,9 +22,13 @@ on:
 env:
   UPLOAD_BIN_DIR: true
   UPLOAD_RELEASE: true
-  # SSH: true
-  # KERNELSU: true
-  # CUSTOM: true
+
+  CONFIG_KERNELSU: true
+  CONFIG_KRPOBES_PROBLEM: true
+  CONFIG_SSH: true
+  CONFIG_CUSTOM: true
+
+  # Default
   REPO_URL: https://github.com/Viole403/android_kernel_xiaomi_mt6768.git
   REPO_BRANCH: suisei
   TOOLCHAIN_URL: https://gitlab.com/Panchajanya1999/azure-clang.git
@@ -64,6 +68,15 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
+    - name: Check Cache Github Acton Workflow
+      id: cache-github
+      uses: actions/cache@v3
+      with:
+        path: |
+          $GITHUB_WORKSPACE/toolchain
+          $GITHUB_WORKSPACE/anykernel
+          $GITHUB_WORKSPACE
+
     - name: Clone source code
       working-directory: /workdir
       run: |
@@ -71,11 +84,11 @@ jobs:
         git clone $EXTERNAL_URL extra
         git clone $ANYKERNEL_URL anykernel
         rm -rf ./anykernel/.github && rm -rf ./anykernel/README.md && rm -rf ./anykernel/.git && rm -rf ./anykernel/anykernel.sh
-        git clone --recurse-submodules --depth=1 $REPO_URL -b $REPO_BRANCH kernel
+        git clone --depth=1 $REPO_URL -b $REPO_BRANCH kernel
         git clone --depth=1 $TOOLCHAIN_URL -b $TOOLCHAIN_BRANCH toolchain
-        cp ./extra/compile.sh ./kernel/
+        # cp ./extra/compile.sh ./kernel/
         cp ./extra/anykernel.sh ./anykernel/
-        ln -sf /workdir/kernel $GITHUB_WORKSPACE/kernel
+        # ln -sf /workdir/kernel $GITHUB_WORKSPACE/kernel
 
     - name: Set Cache
       working-directory: /workdir/kernel
@@ -83,20 +96,33 @@ jobs:
         ccache -M 15G
 
     - name: Get current date
-      id: get_date
+      id: get-date
       run: |
         # echo "::set-output name=date::$(date +'%d-%m-%Y')"
-        echo "date=$(date +'%d-%m-%Y')" >> $GITHUB_OUTPUT
+        echo "date=$(/bin/date -u "+%d/%m/%Y")" >> $GITHUB_OUTPUT
+      shell: bash
         
-    - name: Patch KernelSU (${{github.event.inputs.kernelsu}})
+    - name: Patch KernelSU (${{ env.CONFIG_KERNELSU }})
       working-directory: /workdir/kernel
-      if: (github.event.inputs.kernelsu == 'true' && github.event.inputs.kernelsu  != 'false') || contains(github.event.action, 'kernelsu')
+      # if: (github.event.inputs.kernelsu == 'true' && github.event.inputs.kernelsu  != 'false') || contains(github.event.action, 'kernelsu')
+      if: ${{  env.CONFIG_KERNELSU == 'true' }}
       run: |
        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
         
+    - name: Patch for KPROBES have problem (${{ env.CONFIG_KRPOBES_PROBLEM }})
+      working-directory: /workdir/kernel
+      if: ${{  env.CONFIG_KRPOBES_PROBLEM == 'true' }}
+      run: |
+       cd KernelSU/kernel
+       sed -i 's/extern void ksu_enable_sucompat();/\/\/extern void ksu_enable_sucompat();/g' ksu.c
+       sed -i 's/extern void ksu_enable_ksud();/\/\/extern void ksu_enable_ksud();/g' ksu.c
+       sed -i 's/ksu_enable_sucompat();/\/\/ksu_enable_sucompat();/g' ksu.c
+       sed -i 's/ksu_enable_ksud();/\/\/ksu_enable_ksud();/g' ksu.c
+
     - name: Kernel Custom Script (${{github.event.inputs.custom}})
       working-directory: /workdir
-      if: (github.event.inputs.custom == 'true' && github.event.inputs.custom  != 'false') || contains(github.event.action, 'custom')
+      # if: (github.event.inputs.custom == 'true' && github.event.inputs.custom  != 'false') || contains(github.event.action, 'custom')
+      if: ${{ env.CONFIG_CUSTOM == 'true' }}
       run: |
        cp ./extra/custom.sh ./kernel/
        chmod +x ./kernel/custom.sh
@@ -104,7 +130,8 @@ jobs:
         
     - name: SSH connection to Actions (${{github.event.inputs.ssh}})
       uses: P3TERX/ssh2actions@v1.0.0
-      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      # if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+      if: ${{ env.CONFIG_SSH == 'true' }}
 
     - name: Set Device
       working-directory: /workdir/kernel
@@ -139,13 +166,12 @@ jobs:
       uses: actions/upload-artifact@main
       with:
         # working-directory: /workdir/kernel
-        name: Suisei_Kernel_${{ env.DEVICE }}_Boot
+        name: Nimow_Kernel_${{ env.DEVICE }}_Boot
         path: /workdir/kernel/out/arch/arm64/boot/
 
     - name: Upload Kernel Patcher
       uses: actions/upload-artifact@main
       with:
         # working-directory: /workdir
-#         name: [${{ steps.get_date.outputs.date }}]Suisei_Kernel_${{ env.DEVICE }}
-        name: Kernel_Nimow_Anykernel
+        name: Nimow_Kernel_${{ env.DEVICE }}_Anykernel
         path: /workdir/anykernel/
