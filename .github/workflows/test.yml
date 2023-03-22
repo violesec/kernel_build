@@ -25,8 +25,8 @@ env:
 
   CONFIG_KERNELSU: true
   CONFIG_KRPOBES_PROBLEM: true
-  CONFIG_SSH: true
-  CONFIG_CUSTOM: true
+  CONFIG_SSH: false
+  CONFIG_CUSTOM: false
 
   # Default
   REPO_URL: https://github.com/Viole403/android_kernel_xiaomi_mt6768.git
