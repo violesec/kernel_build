@@ -27,13 +27,12 @@ env:
   CONFIG_KRPOBES_PROBLEM: true
   CONFIG_SSH: false
   CONFIG_CUSTOM: false
+  CONFIG_FILE: .config
 
-  # Default
   REPO_URL: https://github.com/Viole403/android_kernel_xiaomi_mt6768.git
   REPO_BRANCH: suisei
   TOOLCHAIN_URL: https://gitlab.com/Panchajanya1999/azure-clang.git
   TOOLCHAIN_BRANCH: main
-  CONFIG_FILE: .config
   EXTERNAL_URL: https://github.com/violesec/kernel_build.git
   ANYKERNEL_URL: https://github.com/violesec/anykernel-lance.git
   ANYKERNEL_BRANCH: main
@@ -68,16 +67,6 @@ jobs:
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
 
-    - name: Check Cache Github Acton Workflow
-      id: cache-github
-      uses: actions/cache@v3
-      with:
-        path: |
-          $GITHUB_WORKSPACE/toolchain
-          $GITHUB_WORKSPACE/anykernel
-          $GITHUB_WORKSPACE/kernel
-        key: ${{ runner.os }}-${{ env.DEVICE }}
-
     - name: Clone source code
       working-directory: /workdir
       run: |
@@ -87,9 +76,9 @@ jobs:
         rm -rf ./anykernel/.github && rm -rf ./anykernel/README.md && rm -rf ./anykernel/.git && rm -rf ./anykernel/anykernel.sh
         git clone --depth=1 $REPO_URL -b $REPO_BRANCH kernel
         git clone --depth=1 $TOOLCHAIN_URL -b $TOOLCHAIN_BRANCH toolchain
-        # cp ./extra/compile.sh ./kernel/
+        cp ./extra/compile.sh ./kernel/
         cp ./extra/anykernel.sh ./anykernel/
-        # ln -sf /workdir/kernel $GITHUB_WORKSPACE/kernel
+        ln -sf /workdir/kernel $GITHUB_WORKSPACE/kernel
 
     - name: Set Cache
       working-directory: /workdir/kernel
