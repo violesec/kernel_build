@@ -1,4 +1,4 @@
-name: Build Kernel (Azure-Clang)
+name: Build Kernel Test (Azure-Clang)
 
 on:
   push:
@@ -75,7 +75,8 @@ jobs:
         path: |
           $GITHUB_WORKSPACE/toolchain
           $GITHUB_WORKSPACE/anykernel
-          $GITHUB_WORKSPACE
+          $GITHUB_WORKSPACE/kernel
+        key: ${{ runner.os }}-${{ env.DEVICE }}
 
     - name: Clone source code
       working-directory: /workdir
