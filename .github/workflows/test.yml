@@ -89,7 +89,7 @@ jobs:
       id: get-date
       run: |
         # echo "::set-output name=date::$(date +'%d-%m-%Y')"
-        echo "date=$(/bin/date -u "+%d/%m/%Y")" >> $GITHUB_OUTPUT
+        echo "date=$(/bin/date -u "+%d-%m-%Y")" >> $GITHUB_OUTPUT
       shell: bash
         
     - name: Patch KernelSU (${{ env.CONFIG_KERNELSU }})
