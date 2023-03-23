@@ -1,7 +1,6 @@
 name: Build Kernel Test (Azure-Clang)
 
 on:
-#   [push, pull_request]
   push:
   pull_request:
   repository_dispatch:
@@ -11,7 +10,6 @@ env:
   UPLOAD_BIN_DIR: true
   UPLOAD_RELEASE: true
 
-  # CONFIG_TOOLCHAIN: true
   CONFIG_KERNELSU: true
   CONFIG_KERNELSU_SAFEMODE: true
   CONFIG_BUILTIN_KERNELSU: true
@@ -21,7 +19,9 @@ env:
   CONFIG_DISABLE_LTO: false
   CONFIG_SSH: false
   CONFIG_CUSTOM: false
+  # CONFIG_TOOLCHAIN: true
   CONFIG_FILE: .config
+  CONFIG_UPLOAD_NAME: KernelSU
 
   REPO_URL: https://github.com/Viole403/android_kernel_xiaomi_mt6768.git
   REPO_BRANCH: suisei
@@ -99,49 +99,47 @@ jobs:
       run: |
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
 
-        # if [ ${{ env.CONFIG_KPROBES }} == 'true' ]; then
-        #   echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        #   echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        #   echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        #   echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        # fi
-        # if [ ${{ env.CONFIG_OVERLAYFS }} == 'true' ]; then
-        #   echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        # fi
-        # if [ ${{ env.CONFIG_DISABLE_LTO }} == true ]; then
-        #   sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        #   sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        #   sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        #   echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        # fi
-        # if [ ${{ env.CONFIG_KERNELSU_SAFEMODE }} == true ]; then
-        #   # Uncomment KernelSU builtin SafeMode
-        #   sed -i 's/\/\/ extern int ksu_/extern int ksu_/g' drivers/input/input.c
-        #   sed -i 's/\/\/ ksu_handle_input_handle/ksu_handle_input_handle/g' drivers/input/input.c
-        # fi
-        #   # Uncomment KernelSU builtin SafeMode
-        echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        sed -i 's/\/\/ extern int ksu_/extern int ksu_/g' drivers/input/input.c
-        sed -i 's/\/\/ ksu_handle_input_handle/ksu_handle_input_handle/g' drivers/input/input.c
-        # Uncomment KernelSU Prebuilt 
-        sed -i 's/\/\/ extern int ksu_handle_execveat/extern int ksu_handle_execveat/g' fs/exec.c
-        sed -i 's/\/\/ ksu_handle_execveat/ksu_handle_execveat/g' fs/exec.c
-        sed -i 's/\/\/ extern int ksu_handle_vfs_read/extern int ksu_handle_vfs_read/g' fs/read_write.c
-        sed -i 's/\/\/ ksu_handle_vfs_read/ksu_handle_vfs_read/g' fs/read_write.c
-        sed -i 's/\/\/ extern int ksu_handle_faccessat/extern int ksu_handle_faccessat/g' fs/open.c
-        sed -i 's/\/\/ ksu_handle_faccessat/ksu_handle_faccessat/g' fs/open.c
-        sed -i 's/\/\/ extern int ksu_handle_stat/extern int ksu_handle_stat/g' fs/stat.c
-        sed -i 's/\/\/ ksu_handle_stat/ksu_handle_stat/g' fs/stat.c
-        
+        if [ ${{ env.CONFIG_KPROBES }} == 'true' ]; then
+          echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+          echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+          echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+          echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        fi
+        if [ ${{ env.CONFIG_OVERLAYFS }} == 'true' ]; then
+          echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        fi
+        if [ ${{ env.CONFIG_DISABLE_LTO }} == 'true' ]; then
+          sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+          sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+          sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+          echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        fi
+        if [ ${{ env.CONFIG_KERNELSU_SAFEMODE }} == 'true' ]; then
+          # Uncomment KernelSU builtin SafeMode
+          sed -i 's/\/\/ extern int ksu_/extern int ksu_/g' drivers/input/input.c
+          sed -i 's/\/\/ ksu_handle_input_handle/ksu_handle_input_handle/g' drivers/input/input.c
+        fi
+        if [ ${{ env.CONFIG_BUILTIN_KERNELSU }} == 'true' ]; then
+          # Uncomment KernelSU Prebuilt see: https://kernelsu.org/guide/how-to-integrate-for-non-gki.html
+          sed -i 's/\/\/ extern int ksu_handle_execveat/extern int ksu_handle_execveat/g' fs/exec.c
+          sed -i 's/\/\/ ksu_handle_execveat/ksu_handle_execveat/g' fs/exec.c
+          sed -i 's/\/\/ extern int ksu_handle_vfs_read/extern int ksu_handle_vfs_read/g' fs/read_write.c
+          sed -i 's/\/\/ ksu_handle_vfs_read/ksu_handle_vfs_read/g' fs/read_write.c
+          sed -i 's/\/\/ extern int ksu_handle_faccessat/extern int ksu_handle_faccessat/g' fs/open.c
+          sed -i 's/\/\/ ksu_handle_faccessat/ksu_handle_faccessat/g' fs/open.c
+          sed -i 's/\/\/ extern int ksu_handle_stat/extern int ksu_handle_stat/g' fs/stat.c
+          sed -i 's/\/\/ ksu_handle_stat/ksu_handle_stat/g' fs/stat.c
+        fi
+
     - name: Patch KPROBES if there is a problem (${{ env.CONFIG_KRPOBES_PROBLEM }})
       working-directory: /workdir/kernel
       if: ${{ env.CONFIG_KRPOBES_PROBLEM == 'true' }}
       run: |
-        cd KernelSU/kernel
-        sed -i 's/extern void ksu_enable_sucompat();/\/\/extern void ksu_enable_sucompat();/g' ksu.c
-        sed -i 's/extern void ksu_enable_ksud();/\/\/extern void ksu_enable_ksud();/g' ksu.c
-        sed -i 's/ksu_enable_sucompat();/\/\/ksu_enable_sucompat();/g' ksu.c
-        sed -i 's/ksu_enable_ksud();/\/\/ksu_enable_ksud();/g' ksu.c
+        # cd KernelSU/kernel
+        sed -i 's/extern void ksu_enable_sucompat();/\/\/extern void ksu_enable_sucompat();/g' kernelSU/kernel/ksu.c
+        sed -i 's/extern void ksu_enable_ksud();/\/\/extern void ksu_enable_ksud();/g' kernelSU/kernel/ksu.c
+        sed -i 's/ksu_enable_sucompat();/\/\/ksu_enable_sucompat();/g' kernelSU/kernel/ksu.c
+        sed -i 's/ksu_enable_ksud();/\/\/ksu_enable_ksud();/g' kernelSU/kernel/ksu.c
         
     - name: SSH connection to Actions (Connect to Github Actions VM via SSH by using tmate)
       uses: P3TERX/ssh2actions@v1.0.0
@@ -150,8 +148,8 @@ jobs:
       # Send connection info to Telegram (optional)
       # You can find related documents here: https://core.telegram.org/bots
       # env:
-        # TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        # TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
     - name: Set Device
       working-directory: /workdir/kernel
@@ -163,35 +161,37 @@ jobs:
       run: |
         chmod +x ./compile.sh
         bash ./compile.sh
-        # ls /workdir/kernel/out/arch/arm64/boot/
+        ls /workdir/kernel/out/arch/arm64/boot/
     
     - name: Pack Kernel
       working-directory: /workdir
       run: |
-        # cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/
-        if [[ -f out/arch/arm64/boot/Image.gz-dtb ]]; then
-          cp out/arch/arm64/boot/Image.gz-dtb ./anykernel/Image.gz-dtb
-        elif [[ -f out/arch/arm64/boot/Image-dtb ]]; then
-          cp out/arch/arm64/boot/Image-dtb ./anykernel/Image-dtb
-        elif [[ -f out/arch/arm64/boot/Image.gz ]]; then
-          cp out/arch/arm64/boot/Image.gz ./anykernel/Image.gz
-        elif [[ -f out/arch/arm64/boot/Image ]]; then
-          cp out/arch/arm64/boot/Image ./anykernel/Image
-        fi
-        if [ -f out/arch/arm64/boot/dtbo.img ]; then
-          cp out/arch/arm64/boot/dtbo.img ./anykernel/dtbo.img
-        fi
+        cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/
+        # if [[ -f out/arch/arm64/boot/Image.gz-dtb ]]; then
+        #   cp out/arch/arm64/boot/Image.gz-dtb ./anykernel/Image.gz-dtb
+        # elif [[ -f out/arch/arm64/boot/Image-dtb ]]; then
+        #   cp out/arch/arm64/boot/Image-dtb ./anykernel/Image-dtb
+        # elif [[ -f out/arch/arm64/boot/Image.gz ]]; then
+        #   cp out/arch/arm64/boot/Image.gz ./anykernel/Image.gz
+        # elif [[ -f out/arch/arm64/boot/Image ]]; then
+        #   cp out/arch/arm64/boot/Image ./anykernel/Image
+        # fi
+        # if [ -f out/arch/arm64/boot/dtbo.img ]; then
+        #   cp out/arch/arm64/boot/dtbo.img ./anykernel/dtbo.img
+        # fi
         
+    # - name: Zip Kernel
+
     - name: Upload Kernel directory
       uses: actions/upload-artifact@main
       with:
         # working-directory: /workdir/kernel
-        name: Nimow_Kernel_${{ env.DEVICE }}_Boot
+        name: ${{ env.CONFIG_UPLOAD_NAME }}-[${{ env.REPO_BRANCH }}]-${{ env.DEVICE }}_Boot-${{ steps.get-date.outputs.date }}
         path: /workdir/kernel/out/arch/arm64/boot/
 
     - name: Upload Kernel Patcher
       uses: actions/upload-artifact@main
       with:
         # working-directory: /workdir
-        name: Nimow_Kernel_${{ env.DEVICE }}_Anykernel
+        name: ${{ env.CONFIG_UPLOAD_NAME }}-[${{ env.REPO_BRANCH }}]-${{ env.DEVICE }}_Anykernel-${{ steps.get-date.outputs.date }}
         path: /workdir/anykernel/
