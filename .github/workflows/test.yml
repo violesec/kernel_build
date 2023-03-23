@@ -17,7 +17,7 @@ env:
   CONFIG_KPROBES: false
   CONFIG_KRPOBES_PROBLEM: true
   CONFIG_DISABLE_LTO: false
-  CONFIG_SSH: false
+  CONFIG_SSH: true
   CONFIG_CUSTOM: false
   # CONFIG_TOOLCHAIN: true
   CONFIG_FILE: .config
@@ -147,7 +147,7 @@ jobs:
       if: ${{ env.CONFIG_SSH == 'true' }}
       # Send connection info to Telegram (optional)
       # You can find related documents here: https://core.telegram.org/bots
-      # env:
+      env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
