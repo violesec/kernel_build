@@ -135,7 +135,7 @@ jobs:
       working-directory: /workdir/kernel
       if: ${{ env.CONFIG_KRPOBES_PROBLEM == 'true' }}
       run: |
-        # cd KernelSU/kernel
+        cd KernelSU/kernel
         sed -i 's/extern void ksu_enable_sucompat();/\/\/extern void ksu_enable_sucompat();/g' kernelSU/kernel/ksu.c
         sed -i 's/extern void ksu_enable_ksud();/\/\/extern void ksu_enable_ksud();/g' kernelSU/kernel/ksu.c
         sed -i 's/ksu_enable_sucompat();/\/\/ksu_enable_sucompat();/g' kernelSU/kernel/ksu.c
