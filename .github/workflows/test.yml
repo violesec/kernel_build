@@ -135,10 +135,11 @@ jobs:
       working-directory: /workdir/kernel
       if: ${{ env.CONFIG_KRPOBES_PROBLEM == 'true' }}
       run: |
-        sed -i 's/extern void ksu_enable_sucompat();/\/\/extern void ksu_enable_sucompat();/g' kernelSU/kernel/ksu.c
-        sed -i 's/extern void ksu_enable_ksud();/\/\/extern void ksu_enable_ksud();/g' kernelSU/kernel/ksu.c
-        sed -i 's/ksu_enable_sucompat();/\/\/ksu_enable_sucompat();/g' kernelSU/kernel/ksu.c
-        sed -i 's/ksu_enable_ksud();/\/\/ksu_enable_ksud();/g' kernelSU/kernel/ksu.c
+        cd KernelSU/kernel
+        sed -i 's/extern void ksu_enable_sucompat();/\/\/extern void ksu_enable_sucompat();/g' ksu.c
+        sed -i 's/extern void ksu_enable_ksud();/\/\/extern void ksu_enable_ksud();/g' ksu.c
+        sed -i 's/ksu_enable_sucompat();/\/\/ksu_enable_sucompat();/g' ksu.c
+        sed -i 's/ksu_enable_ksud();/\/\/ksu_enable_ksud();/g' ksu.c
         
     - name: SSH connection to Actions (Connect to Github Actions VM via SSH by using tmate)
       uses: P3TERX/ssh2actions@v1.0.0
