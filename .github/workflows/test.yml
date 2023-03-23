@@ -99,26 +99,30 @@ jobs:
       run: |
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
 
-        if [ ${{ env.CONFIG_KPROBES }} == 'true' ]; then
-          echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-          echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-          echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-          echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        fi
-        if [ ${{ env.CONFIG_OVERLAYFS }} == 'true' ]; then
-          echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        fi
-        if [ ${{ env.CONFIG_DISABLE_LTO }} = true ]; then
-          sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-          sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-          sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-          echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        fi
-        if [ ${{ env.CONFIG_KERNELSU_SAFEMODE }} == true ]; then
-          # Uncomment KernelSU builtin SafeMode
-          sed -i 's/\/\/ extern int ksu_/extern int ksu_/g' drivers/input/input.c
-          sed -i 's/\/\/ ksu_handle_input_handle/ksu_handle_input_handle/g' drivers/input/input.c
-        fi
+        # if [ ${{ env.CONFIG_KPROBES }} == 'true' ]; then
+        #   echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        #   echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        #   echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        #   echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        # fi
+        # if [ ${{ env.CONFIG_OVERLAYFS }} == 'true' ]; then
+        #   echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        # fi
+        # if [ ${{ env.CONFIG_DISABLE_LTO }} == true ]; then
+        #   sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        #   sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        #   sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        #   echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        # fi
+        # if [ ${{ env.CONFIG_KERNELSU_SAFEMODE }} == true ]; then
+        #   # Uncomment KernelSU builtin SafeMode
+        #   sed -i 's/\/\/ extern int ksu_/extern int ksu_/g' drivers/input/input.c
+        #   sed -i 's/\/\/ ksu_handle_input_handle/ksu_handle_input_handle/g' drivers/input/input.c
+        # fi
+        #   # Uncomment KernelSU builtin SafeMode
+        echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        sed -i 's/\/\/ extern int ksu_/extern int ksu_/g' drivers/input/input.c
+        sed -i 's/\/\/ ksu_handle_input_handle/ksu_handle_input_handle/g' drivers/input/input.c
         # Uncomment KernelSU Prebuilt 
         sed -i 's/\/\/ extern int ksu_handle_execveat/extern int ksu_handle_execveat/g' fs/exec.c
         sed -i 's/\/\/ ksu_handle_execveat/ksu_handle_execveat/g' fs/exec.c
@@ -146,8 +150,8 @@ jobs:
       # Send connection info to Telegram (optional)
       # You can find related documents here: https://core.telegram.org/bots
       # env:
-#         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-#         TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        # TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        # TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
     - name: Set Device
       working-directory: /workdir/kernel
