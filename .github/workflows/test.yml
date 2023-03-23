@@ -130,7 +130,7 @@ jobs:
         sed -i 's/\/\/ ksu_handle_vfs_read/ksu_handle_vfs_read/g' fs/read_write.c
         sed -i 's/\/\/ extern int ksu_handle_faccessat/extern int ksu_handle_faccessat/g' fs/open.c
         sed -i 's/\/\/ ksu_handle_faccessat/ksu_handle_faccessat/g' fs/open.c
-        sed =i 's/\/\/ extern int ksu_handle_stat/extern int ksu_handle_stat/g' fs/stat.c
+        sed -i 's/\/\/ extern int ksu_handle_stat/extern int ksu_handle_stat/g' fs/stat.c
         sed -i 's/\/\/ ksu_handle_stat/ksu_handle_stat/g' fs/stat.c
         
     - name: Patch KPROBES if there is a problem (${{ env.CONFIG_KRPOBES_PROBLEM }})
