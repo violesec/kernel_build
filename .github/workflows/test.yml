@@ -166,9 +166,9 @@ jobs:
         # ls /workdir/kernel/out/arch/arm64/boot/
     
     - name: Pack Kernel
-      working-directory: /workdir/kernel
+      working-directory: /workdir
       run: |
-        cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/
+        # cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/
         if [[ -f out/arch/arm64/boot/Image.gz-dtb ]]; then
           cp out/arch/arm64/boot/Image.gz-dtb ./anykernel/Image.gz-dtb
         elif [[ -f out/arch/arm64/boot/Image-dtb ]]; then
