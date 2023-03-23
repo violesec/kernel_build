@@ -1,11 +1,11 @@
 name: Build Kernel Test (Azure-Clang)
 
 on:
-  [push, pull_request]
-  # push:
-  # pull_request:
-  # repository_dispatch:
-  # workflow_dispatch:
+#   [push, pull_request]
+  push:
+  pull_request:
+  repository_dispatch:
+  workflow_dispatch:
 
 env:
   UPLOAD_BIN_DIR: true
