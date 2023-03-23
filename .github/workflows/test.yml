@@ -161,35 +161,9 @@ jobs:
     - name: Compile Source
       working-directory: /workdir/kernel
       run: |
-        # chmod +x ./compile.sh
-        # bash ./compile.sh
+        chmod +x ./compile.sh
+        bash ./compile.sh
         # ls /workdir/kernel/out/arch/arm64/boot/
-        starttime=`date +'%Y-%m-%d %H:%M:%S'`
-        
-        # Export ARCH and SUBARCH
-        export ARCH=${{ env.ARCH }}
-        export SUBARCH=${{ env.SUBARCH }}
-        
-        # KBUILD HOST and USER
-        export KBUILD_BUILD_HOST=ArchLinux
-        export KBUILD_BUILD_USER="Viole403"
-
-        make -j$(nproc --all) O=out \
-          NM=llvm-nm \
-          OBJCOPY=llvm-objcopy \
-          LD=ld.lld \
-          CROSS_COMPILE=aarch64-linux-gnu- \
-          CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
-          CC=clang \
-          AR=llvm-ar \
-          OBJDUMP=llvm-objdump \
-          STRIP=llvm-strip \
-          2>&1 | tee error.log
-        
-        endtime=`date +'%Y-%m-%d %H:%M:%S'`
-        start_seconds=$(date --date=" $starttime" +%s);
-        end_seconds=$(date --date="$endtime" +%s);
-      shell: bash
     
     - name: Pack Kernel
       working-directory: /workdir/kernel
