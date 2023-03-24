@@ -167,22 +167,19 @@ jobs:
       working-directory: /workdir/kernel
       run: |
         # cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz-dtb ./anykernel/
-        if [[ -f out/arch/${{ env.ARCH }}/boot/Image.gz-dtb ]]; then
-          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz-dtb ./anykernel/Image.gz-dtb
-        elif [[ -f out/arch/${{ env.ARCH }}/boot/Image-dtb ]]; then
-          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image-dtb ./anykernel/Image-dtb
-        elif [[ -f out/arch/${{ env.ARCH }}/boot/Image.gz ]]; then
-          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz ./anykernel/Image.gz
-        elif [[ -f out/arch/${{ env.ARCH }}/boot/Image ]]; then
-          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image ./anykernel/Image
+        if [[ -f /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz-dtb ]]; then
+          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz-dtb ./anykernel/
+        elif [[ -f /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image-dtb ]]; then
+          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image-dtb ./anykernel/
+        elif [[ -f /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz ]]; then
+          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz ./anykernel/
+        elif [[ -f /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image ]]; then
+          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image ./anykernel/
         fi
-        # if [ -f out/arch/${{ env.ARCH }}/boot/dtbo.img ]; then
-        #   cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img ./anykernel/dtbo.img
-        # fi
         if [${{ env.CONFIG_USE_DTBO }} == 'true']; then
-          # cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img ./anykernel/dtbo.img
+          # cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img ./anykernel/
           if [ -f out/arch/${{ env.ARCH }}/boot/dtbo.img ]; then
-            cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img ./anykernel/dtbo.img
+            cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img ./anykernel/
           else
             echo "DTBO Image is empty"
           fi
