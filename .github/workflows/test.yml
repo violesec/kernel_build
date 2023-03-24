@@ -1,4 +1,4 @@
-name: Build Kernel Test (Azure-Clang)
+name: Build Kernel with KernelSU (Azure-Clang)
 
 on:
   push:
@@ -10,13 +10,14 @@ env:
   UPLOAD_BIN_DIR: true
   UPLOAD_RELEASE: true
 
+  CONFIG_DISABLE_LTO: false
+  CONFIG_USE_DTBO: false
   CONFIG_KERNELSU: true
   CONFIG_KERNELSU_SAFEMODE: true
   CONFIG_BUILTIN_KERNELSU: true
   CONFIG_OVERLAYFS: true
   CONFIG_KPROBES: false
   CONFIG_KRPOBES_PROBLEM: true
-  CONFIG_DISABLE_LTO: false
   CONFIG_SSH: false
   CONFIG_CUSTOM: false
   # CONFIG_TOOLCHAIN: true
@@ -143,7 +144,6 @@ jobs:
         
     - name: SSH connection to Actions (Connect to Github Actions VM via SSH by using tmate)
       uses: P3TERX/ssh2actions@v1.0.0
-      # if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
       if: ${{ env.CONFIG_SSH == 'true' }}
       # Send connection info to Telegram (optional)
       # You can find related documents here: https://core.telegram.org/bots
@@ -161,33 +161,48 @@ jobs:
       run: |
         chmod +x ./compile.sh
         bash ./compile.sh
-        ls /workdir/kernel/out/arch/arm64/boot/
+        ls /workdir/kernel/out/arch/${{ env.ARCH }}/boot/
     
     - name: Pack Kernel
-      working-directory: /workdir
+      working-directory: /workdir/kernel
       run: |
-        cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/
-        # if [[ -f out/arch/arm64/boot/Image.gz-dtb ]]; then
-        #   cp out/arch/arm64/boot/Image.gz-dtb ./anykernel/Image.gz-dtb
-        # elif [[ -f out/arch/arm64/boot/Image-dtb ]]; then
-        #   cp out/arch/arm64/boot/Image-dtb ./anykernel/Image-dtb
-        # elif [[ -f out/arch/arm64/boot/Image.gz ]]; then
-        #   cp out/arch/arm64/boot/Image.gz ./anykernel/Image.gz
-        # elif [[ -f out/arch/arm64/boot/Image ]]; then
-        #   cp out/arch/arm64/boot/Image ./anykernel/Image
+        # cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz-dtb ./anykernel/
+        if [[ -f out/arch/${{ env.ARCH }}/boot/Image.gz-dtb ]]; then
+          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz-dtb ./anykernel/Image.gz-dtb
+        elif [[ -f out/arch/${{ env.ARCH }}/boot/Image-dtb ]]; then
+          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image-dtb ./anykernel/Image-dtb
+        elif [[ -f out/arch/${{ env.ARCH }}/boot/Image.gz ]]; then
+          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz ./anykernel/Image.gz
+        elif [[ -f out/arch/${{ env.ARCH }}/boot/Image ]]; then
+          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image ./anykernel/Image
+        fi
+        # if [ -f out/arch/${{ env.ARCH }}/boot/dtbo.img ]; then
+        #   cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img ./anykernel/dtbo.img
         # fi
-        # if [ -f out/arch/arm64/boot/dtbo.img ]; then
-        #   cp out/arch/arm64/boot/dtbo.img ./anykernel/dtbo.img
-        # fi
+        if [${{ env.CONFIG_USE_DTBO }} == 'true']; then
+          # cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img ./anykernel/dtbo.img
+          if [ -f out/arch/${{ env.ARCH }}/boot/dtbo.img ]; then
+            cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img ./anykernel/dtbo.img
+          else
+            echo "DTBO Image is empty"
+          fi
+        fi
         
     # - name: Zip Kernel
+
+    - name: Upload Log Build
+      uses: actions/upload-artifact@main
+      with:
+        # working-directory: /workdir/kernel
+        name: ${{ steps.get-date.outputs.date }}${{ env.CONFIG_UPLOAD_NAME }}-[${{ env.REPO_BRANCH }}]-${{ env.DEVICE }}_Log
+        path: /workdir/kernel/error.log
 
     - name: Upload Kernel directory
       uses: actions/upload-artifact@main
       with:
         # working-directory: /workdir/kernel
         name: ${{ env.CONFIG_UPLOAD_NAME }}-[${{ env.REPO_BRANCH }}]-${{ env.DEVICE }}_Boot-${{ steps.get-date.outputs.date }}
-        path: /workdir/kernel/out/arch/arm64/boot/
+        path: /workdir/kernel/out/arch/${{ env.ARCH }}/boot/
 
     - name: Upload Kernel Patcher
       uses: actions/upload-artifact@main
