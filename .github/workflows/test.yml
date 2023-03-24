@@ -166,24 +166,7 @@ jobs:
     - name: Pack Kernel
       working-directory: /workdir/kernel
       run: |
-        # cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz-dtb ./anykernel/
-        if [[ find /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz-dtb ]]; then
-          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz-dtb ./anykernel/
-        elif [[ find /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image-dtb ]]; then
-          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image-dtb ./anykernel/
-        elif [[ find /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz ]]; then
-          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz ./anykernel/
-        elif [[ find /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image ]]; then
-          cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image ./anykernel/
-        fi
-        if [${{ env.CONFIG_USE_DTBO }} == 'true']; then
-          # cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img ./anykernel/
-          if [ find out/arch/${{ env.ARCH }}/boot/dtbo.img ]; then
-            cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/dtbo.img ./anykernel/
-          else
-            echo "DTBO Image is empty"
-          fi
-        fi
+        cp /workdir/kernel/out/arch/${{ env.ARCH }}/boot/Image.gz-dtb ./anykernel/
         
     # - name: Zip Kernel
 
