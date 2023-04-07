@@ -1,4 +1,4 @@
-name: Build Kernel with KernelSU (Azure-Clang)
+name: Build Kernel with KernelSU (Nimow-Clang)
 
 on:
   push:
@@ -24,8 +24,8 @@ env:
   CONFIG_FILE: .config
   CONFIG_UPLOAD_NAME: KernelSU
 
-  REPO_URL: https://github.com/violesec/android_kernel_xiaomi_mt6768.git
-  REPO_BRANCH: suisei
+  REPO_URL: https://github.com/Viole403/android_kernel_xiaomi_mt6768.git
+  REPO_BRANCH: suise-test
   TOOLCHAIN_URL: https://gitlab.com/Panchajanya1999/azure-clang.git
   TOOLCHAIN_BRANCH: main
   EXTERNAL_URL: https://github.com/violesec/kernel_build.git
@@ -36,7 +36,7 @@ env:
   ARCH: arm64
   SUBARCH: arm64
   DEVICE: lancelot
-  DEVICE_DEFCONFIG: lancelot_defconfig
+  DEVICE_DEFCONFIG: lancelot_generated_defconfig
   USE_CCACHE: 1
   CCACHE_DIR: ~/.ccache
   BUILDER: /workdir/toolchain/bin/
@@ -49,6 +49,13 @@ jobs:
     - name: Checkout
       uses: actions/checkout@main
 
+    - name: Telegram Notification Started
+      run: |
+        curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" -d chat_id="${{ secrets.TELEGRAM_CHAT_ID_PERSONAL }}" \
+        -d "disable_web_page_preview=true" \
+        -d "parse_mode=html" \
+        -d text="<b>Kernel Compiler Started</b>"
+
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -56,7 +63,7 @@ jobs:
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq update
         #sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
-        sudo -E apt-get install -y bc bison build-essential binutils-dev ca-certificates ccache cmake curl flex file g++-multilib git gnupg gperf imagemagick lib32ncurses5-dev lib32readline-dev lib32z1-dev libelf-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libwxgtk3.0-gtk3-dev libc6-i386 libxml2 libxml2-utils lld lzop ninja-build pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev unzip openjdk-8-jdk language-pack-zh-hans texinfo python python3.7 vim u-boot-tools xz-utils zlib1g-dev
+        sudo -E apt-get install -y bc bison build-essential binutils-dev ca-certificates ccache cmake curl flex file g++-multilib git gnupg gperf imagemagick libc6 lib32ncurses5-dev lib32readline-dev lib32z1-dev libelf-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libwxgtk3.0-gtk3-dev libc6-i386 libxml2 libxml2-utils lld lzop ninja-build pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev unzip openjdk-8-jdk language-pack-zh-hans texinfo python python3.7 vim u-boot-tools xz-utils zlib1g-dev
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
@@ -71,7 +78,9 @@ jobs:
         git clone $ANYKERNEL_URL anykernel
         rm -rf ./anykernel/.github && rm -rf ./anykernel/README.md && rm -rf ./anykernel/.git && rm -rf ./anykernel/anykernel.sh
         git clone --depth=1 $REPO_URL -b $REPO_BRANCH kernel
-        git clone --depth=1 $TOOLCHAIN_URL -b $TOOLCHAIN_BRANCH toolchain
+        mkdir toolchain
+        wget -q  $(curl https://raw.githubusercontent.com/Viole403/Nimow-Clang/main/Clang-main-link.txt 2>/dev/null) -O "Nimow-Clang-main.tar.gz"
+        tar -xf Nimow-Clang-main.tar.gz -C toolchain
         cp ./extra/compile.sh ./kernel/
         cp ./extra/anykernel.sh ./anykernel/
         ln -sf /workdir/kernel $GITHUB_WORKSPACE/kernel
@@ -149,7 +158,7 @@ jobs:
       # You can find related documents here: https://core.telegram.org/bots
       env:
         TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID_PERSONAL }}
 
     - name: Set Device
       working-directory: /workdir/kernel
@@ -166,7 +175,7 @@ jobs:
     - name: Pack Kernel
       working-directory: /workdir
       run: |
-        cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/Image-dtb
+        cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/
         
     # - name: Zip Kernel
 
