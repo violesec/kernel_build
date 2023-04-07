@@ -14,7 +14,6 @@ on:
   pull_request:
   repository_dispatch:
   workflow_dispatch:
-  
     inputs:
       ssh:
         description: 'SSH connection to Actions'
@@ -104,7 +103,7 @@ jobs:
       run: |
         ccache -M 15G
         
-- name: Patch KernelSU (${{ env.CONFIG_KERNELSU }})
+    - name: Patch KernelSU (${{ env.CONFIG_KERNELSU }})
       working-directory: /workdir/kernel
       # if: (github.event.inputs.kernelsu == 'true' && github.event.inputs.kernelsu  != 'false') || contains(github.event.action, 'kernelsu')
       if: ${{ env.CONFIG_KERNELSU == 'true' }}
