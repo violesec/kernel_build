@@ -10,8 +10,11 @@
 name: Build Kernel (Azure-Clang)
 
 on:
+  push:
+  pull_request:
   repository_dispatch:
   workflow_dispatch:
+  
     inputs:
       ssh:
         description: 'SSH connection to Actions'
