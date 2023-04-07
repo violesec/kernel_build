@@ -1,4 +1,4 @@
-name: Build Kernel with KernelSU (Nimow-Clang)
+name: Build Kernel with KernelSU (WeebX-Clang)
 
 on:
   push:
@@ -55,7 +55,6 @@ jobs:
         -d "disable_web_page_preview=true" \
         -d "parse_mode=html" \
         -d text="<b>Kernel Compiler Started</b>"
-
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -69,7 +68,6 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
-
     - name: Clone source code
       working-directory: /workdir
       run: |
@@ -79,12 +77,11 @@ jobs:
         rm -rf ./anykernel/.github && rm -rf ./anykernel/README.md && rm -rf ./anykernel/.git && rm -rf ./anykernel/anykernel.sh
         git clone --depth=1 $REPO_URL -b $REPO_BRANCH kernel
         mkdir toolchain
-        wget -q  $(curl https://raw.githubusercontent.com/Viole403/Nimow-Clang/main/Clang-main-link.txt 2>/dev/null) -O "Nimow-Clang-main.tar.gz"
-        tar -xf Nimow-Clang-main.tar.gz -C toolchain
+        wget -q  $(curl https://raw.githubusercontent.com/XSans0/WeebX-Clang/main/main/link.txt 2>/dev/null) -O "WeebX-Clang-17.0.0.tar.gz"
+        tar -xf WeebX-Clang-17.0.0.tar.gz -C toolchain
         cp ./extra/compile.sh ./kernel/
         cp ./extra/anykernel.sh ./anykernel/
         ln -sf /workdir/kernel $GITHUB_WORKSPACE/kernel
-
     # - name: Get Toolchain
     #   working-directory: /workdir
     #   run: | 
@@ -94,7 +91,6 @@ jobs:
       working-directory: /workdir/kernel
       run: |
         ccache -M 15G
-
     - name: Get current date
       id: get-date
       run: |
@@ -108,7 +104,6 @@ jobs:
       if: ${{ env.CONFIG_KERNELSU == 'true' }}
       run: |
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
-
         if [ ${{ env.CONFIG_KPROBES }} == 'true' ]; then
           echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
           echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
@@ -140,7 +135,6 @@ jobs:
           sed -i 's/\/\/ extern int ksu_handle_stat/extern int ksu_handle_stat/g' fs/stat.c
           sed -i 's/\/\/ ksu_handle_stat/ksu_handle_stat/g' fs/stat.c
         fi
-
     - name: Patch KPROBES if there is a problem (${{ env.CONFIG_KRPOBES_PROBLEM }})
       working-directory: /workdir/kernel
       if: ${{ env.CONFIG_KRPOBES_PROBLEM == 'true' }}
@@ -164,7 +158,6 @@ jobs:
       working-directory: /workdir/kernel
       run: |
         make O=out ARCH=$ARCH $DEVICE_DEFCONFIG
-
     - name: Compile Source
       working-directory: /workdir/kernel
       run: |
