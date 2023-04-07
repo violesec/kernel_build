@@ -1,0 +1,201 @@
+name: Build Kernel with KernelSU (WeebX-Clang)
+
+on:
+  push:
+  pull_request:
+  repository_dispatch:
+  workflow_dispatch:
+
+env:
+  UPLOAD_BIN_DIR: true
+  UPLOAD_RELEASE: true
+
+  CONFIG_DISABLE_LTO: false
+  CONFIG_USE_DTBO: false
+  CONFIG_KERNELSU: true
+  CONFIG_KERNELSU_SAFEMODE: true
+  CONFIG_BUILTIN_KERNELSU: true
+  CONFIG_OVERLAYFS: true
+  CONFIG_KPROBES: false
+  CONFIG_KRPOBES_PROBLEM: true
+  CONFIG_SSH: false
+  CONFIG_CUSTOM: false
+  # CONFIG_TOOLCHAIN: true
+  CONFIG_FILE: .config
+  CONFIG_UPLOAD_NAME: KernelSU
+
+  REPO_URL: https://github.com/Viole403/android_kernel_xiaomi_mt6768.git
+  REPO_BRANCH: suisei-test
+  TOOLCHAIN_URL: https://gitlab.com/Panchajanya1999/azure-clang.git
+  TOOLCHAIN_BRANCH: main
+  EXTERNAL_URL: https://github.com/violesec/kernel_build.git
+  ANYKERNEL_URL: https://github.com/violesec/anykernel-lance.git
+  ANYKERNEL_BRANCH: main
+
+  TZ: Asia/Jakarta
+  ARCH: arm64
+  SUBARCH: arm64
+  DEVICE: lancelot
+  DEVICE_DEFCONFIG: lancelot_generated_defconfig
+  USE_CCACHE: 1
+  CCACHE_DIR: ~/.ccache
+  BUILDER: /workdir/toolchain/bin/
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@main
+
+    - name: Telegram Notification Started
+      run: |
+        curl -s -X POST "https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage" -d chat_id="${{ secrets.TELEGRAM_CHAT_ID_PERSONAL }}" \
+        -d "disable_web_page_preview=true" \
+        -d "parse_mode=html" \
+        -d text="<b>Kernel Compiler Started</b>"
+
+    - name: Initialization environment
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+        sudo -E apt-get -qq update
+        #sudo -E apt-get -qq install $(curl -fsSL git.io/depends-ubuntu-2004)
+        sudo -E apt-get install -y bc bison build-essential binutils-dev ca-certificates ccache cmake curl flex file g++-multilib git gnupg gperf imagemagick libc6 lib32ncurses5-dev lib32readline-dev lib32z1-dev libelf-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libwxgtk3.0-gtk3-dev libc6-i386 libxml2 libxml2-utils lld lzop ninja-build pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev unzip openjdk-8-jdk language-pack-zh-hans texinfo python-is-python3 python2 vim u-boot-tools xz-utils zlib1g-dev
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+        sudo mkdir -p /workdir
+        sudo chown $USER:$GROUPS /workdir
+
+    - name: Clone source code
+      working-directory: /workdir
+      run: |
+        df -hT $PWD
+        git clone $EXTERNAL_URL extra
+        git clone $ANYKERNEL_URL anykernel
+        rm -rf ./anykernel/.github && rm -rf ./anykernel/README.md && rm -rf ./anykernel/.git && rm -rf ./anykernel/anykernel.sh
+        git clone --depth=1 $REPO_URL -b $REPO_BRANCH kernel
+        mkdir toolchain
+        wget -q  $(curl https://raw.githubusercontent.com/XSans0/WeebX-Clang/main/main/link.txt 2>/dev/null) -O "WeebX-Clang-17.0.0.tar.gz"
+        tar -xf WeebX-Clang-17.0.0.tar.gz -C toolchain
+        cp ./extra/compile.sh ./kernel/
+        cp ./extra/anykernel.sh ./anykernel/
+        ln -sf /workdir/kernel $GITHUB_WORKSPACE/kernel
+
+    # - name: Get Toolchain
+    #   working-directory: /workdir
+    #   run: | 
+    #     ls
+
+    - name: Set Cache
+      working-directory: /workdir/kernel
+      run: |
+        ccache -M 15G
+
+    - name: Get current date
+      id: get-date
+      run: |
+        # echo "::set-output name=date::$(date +'%d-%m-%Y')"
+        echo "date=$(/bin/date -u "+%d-%m-%Y")" >> $GITHUB_OUTPUT
+      shell: bash
+        
+    - name: Patch KernelSU (${{ env.CONFIG_KERNELSU }})
+      working-directory: /workdir/kernel
+      # if: (github.event.inputs.kernelsu == 'true' && github.event.inputs.kernelsu  != 'false') || contains(github.event.action, 'kernelsu')
+      if: ${{ env.CONFIG_KERNELSU == 'true' }}
+      run: |
+        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+
+        if [ ${{ env.CONFIG_KPROBES }} == 'true' ]; then
+          echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+          echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+          echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+          echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        fi
+        if [ ${{ env.CONFIG_OVERLAYFS }} == 'true' ]; then
+          echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        fi
+        if [ ${{ env.CONFIG_DISABLE_LTO }} == 'true' ]; then
+          sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+          sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+          sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+          echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
+        fi
+        if [ ${{ env.CONFIG_KERNELSU_SAFEMODE }} == 'true' ]; then
+          # Uncomment KernelSU builtin SafeMode
+          sed -i 's/\/\/ extern int ksu_/extern int ksu_/g' drivers/input/input.c
+          sed -i 's/\/\/ ksu_handle_input_handle/ksu_handle_input_handle/g' drivers/input/input.c
+        fi
+        if [ ${{ env.CONFIG_BUILTIN_KERNELSU }} == 'true' ]; then
+          # Uncomment KernelSU Prebuilt see: https://kernelsu.org/guide/how-to-integrate-for-non-gki.html
+          sed -i 's/\/\/ extern int ksu_handle_execveat/extern int ksu_handle_execveat/g' fs/exec.c
+          sed -i 's/\/\/ ksu_handle_execveat/ksu_handle_execveat/g' fs/exec.c
+          sed -i 's/\/\/ extern int ksu_handle_vfs_read/extern int ksu_handle_vfs_read/g' fs/read_write.c
+          sed -i 's/\/\/ ksu_handle_vfs_read/ksu_handle_vfs_read/g' fs/read_write.c
+          sed -i 's/\/\/ extern int ksu_handle_faccessat/extern int ksu_handle_faccessat/g' fs/open.c
+          sed -i 's/\/\/ ksu_handle_faccessat/ksu_handle_faccessat/g' fs/open.c
+          sed -i 's/\/\/ extern int ksu_handle_stat/extern int ksu_handle_stat/g' fs/stat.c
+          sed -i 's/\/\/ ksu_handle_stat/ksu_handle_stat/g' fs/stat.c
+        fi
+
+    - name: Patch KPROBES if there is a problem (${{ env.CONFIG_KRPOBES_PROBLEM }})
+      working-directory: /workdir/kernel
+      if: ${{ env.CONFIG_KRPOBES_PROBLEM == 'true' }}
+      run: |
+        cd KernelSU/kernel
+        sed -i 's/extern void ksu_enable_sucompat();/\/\/extern void ksu_enable_sucompat();/g' ksu.c
+        sed -i 's/extern void ksu_enable_ksud();/\/\/extern void ksu_enable_ksud();/g' ksu.c
+        sed -i 's/ksu_enable_sucompat();/\/\/ksu_enable_sucompat();/g' ksu.c
+        sed -i 's/ksu_enable_ksud();/\/\/ksu_enable_ksud();/g' ksu.c
+        
+    - name: SSH connection to Actions (Connect to Github Actions VM via SSH by using tmate)
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: ${{ env.CONFIG_SSH == 'true' }}
+      # Send connection info to Telegram (optional)
+      # You can find related documents here: https://core.telegram.org/bots
+      env:
+        TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID_PERSONAL }}
+
+    - name: Set Device
+      working-directory: /workdir/kernel
+      run: |
+        make O=out ARCH=$ARCH $DEVICE_DEFCONFIG
+
+    - name: Compile Source
+      working-directory: /workdir/kernel
+      run: |
+        chmod +x ./compile.sh
+        bash ./compile.sh
+        ls /workdir/kernel/out/arch/${{ env.ARCH }}/boot/
+    
+    - name: Pack Kernel
+      working-directory: /workdir
+      run: |
+        cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/
+        
+    # - name: Zip Kernel
+
+    - name: Upload Log Build
+      uses: actions/upload-artifact@main
+      with:
+        # working-directory: /workdir/kernel
+        name: ${{ steps.get-date.outputs.date }}${{ env.CONFIG_UPLOAD_NAME }}-[${{ env.REPO_BRANCH }}]-${{ env.DEVICE }}_Log
+        path: /workdir/kernel/error.log
+
+    - name: Upload Kernel directory
+      uses: actions/upload-artifact@main
+      with:
+        # working-directory: /workdir/kernel
+        name: ${{ env.CONFIG_UPLOAD_NAME }}-[${{ env.REPO_BRANCH }}]-${{ env.DEVICE }}_Boot-${{ steps.get-date.outputs.date }}
+        path: /workdir/kernel/out/arch/${{ env.ARCH }}/boot/
+
+    - name: Upload Kernel Patcher
+      uses: actions/upload-artifact@main
+      with:
+        # working-directory: /workdir
+        name: ${{ env.CONFIG_UPLOAD_NAME }}-[${{ env.REPO_BRANCH }}]-${{ env.DEVICE }}_Anykernel-${{ steps.get-date.outputs.date }}
+        path: /workdir/anykernel/
