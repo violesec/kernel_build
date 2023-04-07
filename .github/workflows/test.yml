@@ -1,4 +1,4 @@
-name: Build Kernel with KernelSU (WeebX-Clang)
+name: Build Kernel with KernelSU (Nimow-Clang)
 
 on:
   push:
@@ -77,8 +77,8 @@ jobs:
         rm -rf ./anykernel/.github && rm -rf ./anykernel/README.md && rm -rf ./anykernel/.git && rm -rf ./anykernel/anykernel.sh
         git clone --depth=1 $REPO_URL -b $REPO_BRANCH kernel
         mkdir toolchain
-        wget -q  $(curl https://raw.githubusercontent.com/XSans0/WeebX-Clang/main/main/link.txt 2>/dev/null) -O "WeebX-Clang-17.0.0.tar.gz"
-        tar -xf WeebX-Clang-17.0.0.tar.gz -C toolchain
+        wget -q  $(curl https://raw.githubusercontent.com/Viole403/Nimow-Clang/main/Clang-main-link.txt 2>/dev/null) -O "Nimow-Clang-17.0.0.tar.gz"
+        tar -xf Nimow-Clang-17.0.0.tar.gz -C toolchain
         cp ./extra/compile.sh ./kernel/
         cp ./extra/anykernel.sh ./anykernel/
         ln -sf /workdir/kernel $GITHUB_WORKSPACE/kernel
