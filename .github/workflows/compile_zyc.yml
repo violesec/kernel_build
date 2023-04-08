@@ -24,8 +24,8 @@ env:
   CONFIG_FILE: .config
   CONFIG_UPLOAD_NAME: KernelSU
 
-  REPO_URL: https://github.com/Viole403/android_kernel_xiaomi_mt6768.git
-  REPO_BRANCH: staging
+  REPO_URL: https://github.com/mt6768-dev/android_kernel_xiaomi_mt6768.git
+  REPO_BRANCH: lineage-20
   TOOLCHAIN_URL: https://gitlab.com/Panchajanya1999/azure-clang.git
   TOOLCHAIN_BRANCH: main
   EXTERNAL_URL: https://github.com/violesec/kernel_build.git
@@ -86,9 +86,9 @@ jobs:
         git clone $ANYKERNEL_URL anykernel
         rm -rf ./anykernel/.github && rm -rf ./anykernel/README.md && rm -rf ./anykernel/.git && rm -rf ./anykernel/anykernel.sh
         git clone --depth=1 $REPO_URL -b $REPO_BRANCH kernel
-        # mkdir toolchain
-        # wget -q  $(curl https://raw.githubusercontent.com/ZyCromerZ/Clang/main/Clang-main-link.txt 2>/dev/null) -O "ZyC-Clang-main.tar.gz"
-        # tar -xf ZyC-Clang-main.tar.gz -C toolchain
+        mkdir toolchain
+        wget -q  $(curl https://raw.githubusercontent.com/ZyCromerZ/Clang/main/Clang-main-link.txt 2>/dev/null) -O "ZyC-Clang-main.tar.gz"
+        tar -xf ZyC-Clang-main.tar.gz -C toolchain
         cp ./extra/compile.sh ./kernel/
         cp ./extra/anykernel.sh ./anykernel/
         ln -sf /workdir/kernel $GITHUB_WORKSPACE/kernel
