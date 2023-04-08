@@ -39,7 +39,8 @@ env:
   DEVICE_DEFCONFIG: lancelot_generated_defconfig
   USE_CCACHE: 1
   CCACHE_DIR: ~/.ccache
-  BUILDER: /workdir/toolchain/bin/
+  # BUILDER: /workdir/toolchain/bin/
+  BUILDER: /usr/bin/
 
 jobs:
   build:
@@ -66,6 +67,13 @@ jobs:
         sudo -E apt-get install -y bc bison build-essential binutils-dev ca-certificates ccache cmake curl flex file g++-multilib git gnupg gperf imagemagick libc6 lib32ncurses5-dev lib32readline-dev lib32z1-dev libelf-dev liblz4-tool libncurses5-dev libsdl1.2-dev libssl-dev libwxgtk3.0-gtk3-dev libc6-i386 libxml2 libxml2-utils lld lzop ninja-build pngcrush rsync schedtool squashfs-tools xsltproc zip zlib1g-dev unzip openjdk-8-jdk language-pack-zh-hans texinfo python2 python-is-python3 vim u-boot-tools xz-utils zlib1g-dev
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
+        bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
+        chmod +x llvm.sh
+        sudo ./llvm.sh 17
+        wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+        wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+        sudo -E apt-get update && sudo -E apt-get upgrade
+        sudo -E apt-get install clang-17 lldb-17 lld-17 libllvm-17-ocaml-dev libllvm17 llvm-17 llvm-17-dev llvm-17-doc llvm-17-examples llvm-17-runtime clang-17 clang-tools-17 clang-17-doc libclang-common-17-dev libclang-17-dev libclang1-17 clang-format-17 python3-clang-17 clangd-17 clang-tidy-17 libclang-rt-17-dev libpolly-17-dev libfuzzer-17-dev lldb-17 lld-17 libc++-17-dev libc++abi-17-dev libomp-17-dev libclc-17-dev libunwind-17-dev libmlir-17-dev mlir-17-tools libbolt-17-dev bolt-17 flang-17
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
@@ -78,9 +86,9 @@ jobs:
         git clone $ANYKERNEL_URL anykernel
         rm -rf ./anykernel/.github && rm -rf ./anykernel/README.md && rm -rf ./anykernel/.git && rm -rf ./anykernel/anykernel.sh
         git clone --depth=1 $REPO_URL -b $REPO_BRANCH kernel
-        mkdir toolchain
-        wget -q  $(curl https://raw.githubusercontent.com/ZyCromerZ/Clang/main/Clang-main-link.txt 2>/dev/null) -O "ZyC-Clang-main.tar.gz"
-        tar -xf ZyC-Clang-main.tar.gz -C toolchain
+        # mkdir toolchain
+        # wget -q  $(curl https://raw.githubusercontent.com/ZyCromerZ/Clang/main/Clang-main-link.txt 2>/dev/null) -O "ZyC-Clang-main.tar.gz"
+        # tar -xf ZyC-Clang-main.tar.gz -C toolchain
         cp ./extra/compile.sh ./kernel/
         cp ./extra/anykernel.sh ./anykernel/
         ln -sf /workdir/kernel $GITHUB_WORKSPACE/kernel
