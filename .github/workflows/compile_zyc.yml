@@ -18,7 +18,7 @@ env:
   CONFIG_OVERLAYFS: true
   CONFIG_KPROBES: false
   CONFIG_KRPOBES_PROBLEM: true
-  CONFIG_SSH: true
+  CONFIG_SSH: false
   CONFIG_CUSTOM: false
   # CONFIG_TOOLCHAIN: true
   CONFIG_FILE: .config
@@ -36,7 +36,7 @@ env:
   ARCH: arm64
   SUBARCH: arm64
   DEVICE: lancelot
-  DEVICE_DEFCONFIG: lancelot_generated_defconfig
+  DEVICE_DEFCONFIG: lancelot_defconfig
   USE_CCACHE: 1
   CCACHE_DIR: ~/.ccache
   # BUILDER: /workdir/toolchain/bin/
