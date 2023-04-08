@@ -69,7 +69,7 @@ jobs:
         sudo -E apt-get -qq clean
         bash -c "$(wget -O - https://apt.llvm.org/llvm.sh)"
         chmod +x llvm.sh
-        sudo ./llvm.sh 17
+        sudo -E ./llvm.sh 17
         wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
         wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
         sudo -E apt-get update && sudo -E apt-get upgrade
