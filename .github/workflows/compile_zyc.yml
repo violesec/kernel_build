@@ -39,8 +39,7 @@ env:
   DEVICE_DEFCONFIG: lancelot_defconfig
   USE_CCACHE: 1
   CCACHE_DIR: ~/.ccache
-  # BUILDER: /workdir/toolchain/bin/
-  BUILDER: /usr/bin/
+  BUILDER: /workdir/toolchain/bin/
 
 jobs:
   build:
