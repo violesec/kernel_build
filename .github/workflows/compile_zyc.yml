@@ -25,7 +25,7 @@ env:
   CONFIG_UPLOAD_NAME: KernelSU
 
   REPO_URL: https://github.com/Viole403/android_kernel_xiaomi_mt6768.git
-  REPO_BRANCH: staging
+  REPO_BRANCH: suisei
   TOOLCHAIN_URL: https://gitlab.com/Panchajanya1999/azure-clang.git
   TOOLCHAIN_BRANCH: main
   EXTERNAL_URL: https://github.com/violesec/kernel_build.git
