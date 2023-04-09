@@ -79,7 +79,7 @@ jobs:
         rm -rf ./anykernel/.github && rm -rf ./anykernel/README.md && rm -rf ./anykernel/.git && rm -rf ./anykernel/anykernel.sh
         git clone --recursive --depth=1 $REPO_URL -b $REPO_BRANCH kernel
         mkdir toolchain
-        wget -q  $(curl https://raw.githubusercontent.com/ZyCromerZ/Clang/main/Clang-main-link.txt 2>/dev/null) -O "ZyC-Clang-main.tar.gz"
+        wget -q  $(curl https://raw.githubusercontent.com/Viole403/Nimow-Clang/main/Clang-16-link.txt 2>/dev/null) -O "ZyC-Clang-main.tar.gz"
         tar -xf ZyC-Clang-main.tar.gz -C toolchain
         cp ./extra/compile.sh ./kernel/
         cp ./extra/anykernel.sh ./anykernel/
