@@ -77,7 +77,7 @@ jobs:
         git clone $EXTERNAL_URL extra
         git clone $ANYKERNEL_URL anykernel
         rm -rf ./anykernel/.github && rm -rf ./anykernel/README.md && rm -rf ./anykernel/.git && rm -rf ./anykernel/anykernel.sh
-        git clone --depth=1 $REPO_URL -b $REPO_BRANCH kernel
+        git clone --recursive --depth=1 $REPO_URL -b $REPO_BRANCH kernel
         mkdir toolchain
         wget -q  $(curl https://raw.githubusercontent.com/ZyCromerZ/Clang/main/Clang-main-link.txt 2>/dev/null) -O "ZyC-Clang-main.tar.gz"
         tar -xf ZyC-Clang-main.tar.gz -C toolchain
