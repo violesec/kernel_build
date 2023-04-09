@@ -29,8 +29,8 @@ on:
 env:
   UPLOAD_BIN_DIR: true
   UPLOAD_RELEASE: true
-  REPO_URL: https://github.com/Viole403/android_kernel_xiaomi_mt6768.git
-  REPO_BRANCH: suisei
+  REPO_URL: https://github.com/mt6768-dev/android_kernel_xiaomi_mt6768.git
+  REPO_BRANCH: lineage-20
   TOOLCHAIN_URL: https://gitlab.com/Panchajanya1999/azure-clang.git
   TOOLCHAIN_BRANCH: main
   CONFIG_FILE: .config
