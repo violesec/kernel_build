@@ -10,8 +10,6 @@
 name: Build Kernel (Azure-Clang)
 
 on:
-  push:
-  pull_request:
   repository_dispatch:
   workflow_dispatch:
     inputs:
@@ -31,21 +29,6 @@ on:
 env:
   UPLOAD_BIN_DIR: true
   UPLOAD_RELEASE: true
-  
-  CONFIG_DISABLE_LTO: false
-  CONFIG_USE_DTBO: false
-  CONFIG_KERNELSU: true
-  CONFIG_KERNELSU_SAFEMODE: true
-  CONFIG_BUILTIN_KERNELSU: true
-  CONFIG_OVERLAYFS: true
-  CONFIG_KPROBES: false
-  CONFIG_KRPOBES_PROBLEM: true
-  CONFIG_SSH: false
-  CONFIG_CUSTOM: false
-  # CONFIG_TOOLCHAIN: true
-  CONFIG_FILE: .config
-  CONFIG_UPLOAD_NAME: KernelSU
-  
   REPO_URL: https://github.com/Viole403/android_kernel_xiaomi_mt6768.git
   REPO_BRANCH: suisei
   TOOLCHAIN_URL: https://gitlab.com/Panchajanya1999/azure-clang.git
@@ -84,7 +67,6 @@ jobs:
         sudo timedatectl set-timezone "$TZ"
         sudo mkdir -p /workdir
         sudo chown $USER:$GROUPS /workdir
-
     - name: Clone source code
       working-directory: /workdir
       run: |
@@ -97,58 +79,21 @@ jobs:
         cp ./extra/compile.sh ./kernel/
         cp ./extra/anykernel.sh ./anykernel/
         ln -sf /workdir/kernel $GITHUB_WORKSPACE/kernel
-
     - name: Set Cache
       working-directory: /workdir/kernel
       run: |
         ccache -M 15G
         
-    - name: Patch KernelSU (${{ env.CONFIG_KERNELSU }})
+    - name: Patch KernelSU (${{github.event.inputs.kernelsu}})
       working-directory: /workdir/kernel
-      # if: (github.event.inputs.kernelsu == 'true' && github.event.inputs.kernelsu  != 'false') || contains(github.event.action, 'kernelsu')
-      if: ${{ env.CONFIG_KERNELSU == 'true' }}
+      if: (github.event.inputs.kernelsu == 'true' && github.event.inputs.kernelsu  != 'false') || contains(github.event.action, 'kernelsu')
       run: |
-        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
-        if [ ${{ env.CONFIG_KPROBES }} == 'true' ]; then
-          echo "CONFIG_MODULES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-          echo "CONFIG_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-          echo "CONFIG_HAVE_KPROBES=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-          echo "CONFIG_KPROBE_EVENTS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        fi
-        if [ ${{ env.CONFIG_OVERLAYFS }} == 'true' ]; then
-          echo "CONFIG_OVERLAY_FS=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        fi
-        if [ ${{ env.CONFIG_DISABLE_LTO }} == 'true' ]; then
-          sed -i 's/CONFIG_LTO=y/CONFIG_LTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-          sed -i 's/CONFIG_LTO_CLANG=y/CONFIG_LTO_CLANG=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-          sed -i 's/CONFIG_THINLTO=y/CONFIG_THINLTO=n/' arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-          echo "CONFIG_LTO_NONE=y" >> arch/${{ env.ARCH }}/configs/${{ env.DEVICE_DEFCONFIG }}
-        fi
-        if [ ${{ env.CONFIG_KERNELSU_SAFEMODE }} == 'true' ]; then
-          # Uncomment KernelSU builtin SafeMode
-          sed -i 's/\/\/ extern int ksu_/extern int ksu_/g' drivers/input/input.c
-          sed -i 's/\/\/ ksu_handle_input_handle/ksu_handle_input_handle/g' drivers/input/input.c
-        fi
-        if [ ${{ env.CONFIG_BUILTIN_KERNELSU }} == 'true' ]; then
-          # Uncomment KernelSU Prebuilt see: https://kernelsu.org/guide/how-to-integrate-for-non-gki.html
-          sed -i 's/\/\/ extern int ksu_handle_execveat/extern int ksu_handle_execveat/g' fs/exec.c
-          sed -i 's/\/\/ ksu_handle_execveat/ksu_handle_execveat/g' fs/exec.c
-          sed -i 's/\/\/ extern int ksu_handle_vfs_read/extern int ksu_handle_vfs_read/g' fs/read_write.c
-          sed -i 's/\/\/ ksu_handle_vfs_read/ksu_handle_vfs_read/g' fs/read_write.c
-          sed -i 's/\/\/ extern int ksu_handle_faccessat/extern int ksu_handle_faccessat/g' fs/open.c
-          sed -i 's/\/\/ ksu_handle_faccessat/ksu_handle_faccessat/g' fs/open.c
-          sed -i 's/\/\/ extern int ksu_handle_stat/extern int ksu_handle_stat/g' fs/stat.c
-          sed -i 's/\/\/ ksu_handle_stat/ksu_handle_stat/g' fs/stat.c
-        fi
-    - name: Patch KPROBES if there is a problem (${{ env.CONFIG_KRPOBES_PROBLEM }})
-      working-directory: /workdir/kernel
-      if: ${{ env.CONFIG_KRPOBES_PROBLEM == 'true' }}
-      run: |
-        cd KernelSU/kernel
-        sed -i 's/extern void ksu_enable_sucompat();/\/\/extern void ksu_enable_sucompat();/g' ksu.c
-        sed -i 's/extern void ksu_enable_ksud();/\/\/extern void ksu_enable_ksud();/g' ksu.c
-        sed -i 's/ksu_enable_sucompat();/\/\/ksu_enable_sucompat();/g' ksu.c
-        sed -i 's/ksu_enable_ksud();/\/\/ksu_enable_ksud();/g' ksu.c
+       curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -
+       cd KernelSU/kernel
+       sed -i 's/extern void ksu_enable_sucompat();/\/\/extern void ksu_enable_sucompat();/g' ksu.c
+       sed -i 's/extern void ksu_enable_ksud();/\/\/extern void ksu_enable_ksud();/g' ksu.c
+       sed -i 's/ksu_enable_sucompat();/\/\/ksu_enable_sucompat();/g' ksu.c
+       sed -i 's/ksu_enable_ksud();/\/\/ksu_enable_ksud();/g' ksu.c
         
     - name: Kernel Custom Script (${{github.event.inputs.custom}})
       working-directory: /workdir
@@ -166,7 +111,6 @@ jobs:
       working-directory: /workdir/kernel
       run: |
         make O=out ARCH=$ARCH $DEVICE_FULL
-
     - name: Compile Source
       working-directory: /workdir/kernel
       run: |
