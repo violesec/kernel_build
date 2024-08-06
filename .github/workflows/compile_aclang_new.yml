@@ -90,6 +90,7 @@ jobs:
         curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s v0.5.2
         # sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/' arch/arm64/configs/lancelot_defconfig
         cd drivers/kernelsu/
+        ls
         pwd
         sed -i 's/extern void ksu_enable_sucompat();/\/\/extern void ksu_enable_sucompat();/g' ksu.c
         sed -i 's/extern void ksu_enable_ksud();/\/\/extern void ksu_enable_ksud();/g' ksu.c
