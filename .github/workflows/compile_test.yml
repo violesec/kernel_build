@@ -31,7 +31,7 @@ env:
   UPLOAD_RELEASE: true
   REPO_URL: https://github.com/Viole403/android_kernel_xiaomi_mt6768.git
   REPO_BRANCH: lineage-20
-  TOOLCHAIN_URL: https://gitlab.com/Panchajanya1999/azure-clang.git
+  TOOLCHAIN_URL: https://github.com/socaindra/ZyCromerZ-Clang.git
   TOOLCHAIN_BRANCH: main
   CONFIG_FILE: .config
   EXTERNAL_URL: https://github.com/violesec/kernel_build.git
@@ -75,71 +75,64 @@ jobs:
         git clone $ANYKERNEL_URL anykernel
         rm -rf ./anykernel/.github && rm -rf ./anykernel/README.md && rm -rf ./anykernel/.git && rm -rf ./anykernel/anykernel.sh
         git clone --recurse-submodules --depth=1 $REPO_URL -b $REPO_BRANCH kernel
-        # git clone --depth=1 $TOOLCHAIN_URL -b $TOOLCHAIN_BRANCH toolchain
-        # tar --version
-        wget https://github.com/ZyCromerZ/Clang/releases/download/16.0.6-20240430-release/Clang-16.0.6-20240430.tar.gz -nv
-        pwd
-        # tar xvf *.tar.gz -C toolchain
-        tar xvf Clang-16.0.6-20240430.tar.gz -C /workdir
-        ls
-        pwd
+        git clone --depth=1 $TOOLCHAIN_URL -b $TOOLCHAIN_BRANCH toolchain
         cp ./extra/compile.sh ./kernel/
         cp ./extra/anykernel.sh ./anykernel/
         ln -sf /workdir/kernel $GITHUB_WORKSPACE/kernel
-    # - name: Set Cache
-    #   working-directory: /workdir/kernel
-    #   run: |
-    #     ccache -M 15G
-    # - name: Patch KernelSU (${{github.event.inputs.kernelsu}})
-    #   working-directory: /workdir/kernel
-    #   if: (github.event.inputs.kernelsu == 'true' && github.event.inputs.kernelsu  != 'false') || contains(github.event.action, 'kernelsu')
-    #   run: |
-    #     curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s v0.5.2
-    #     # sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/' arch/arm64/configs/lancelot_defconfig
-    #     cd drivers/kernelsu/
-    #     ls
-    #     pwd
-    #     sed -i 's/extern void ksu_enable_sucompat();/\/\/extern void ksu_enable_sucompat();/g' ksu.c
-    #     sed -i 's/extern void ksu_enable_ksud();/\/\/extern void ksu_enable_ksud();/g' ksu.c
-    #     sed -i 's/ksu_enable_sucompat();/\/\/ksu_enable_sucompat();/g' ksu.c
-    #     sed -i 's/ksu_enable_ksud();/\/\/ksu_enable_ksud();/g' ksu.c
-    # - name: Kernel Custom Script (${{github.event.inputs.custom}})
-    #   working-directory: /workdir
-    #   if: (github.event.inputs.custom == 'true' && github.event.inputs.custom  != 'false') || contains(github.event.action, 'custom')
-    #   run: |
-    #     cp ./extra/custom.sh ./kernel/
-    #     chmod +x ./kernel/custom.sh
-    #     bash ./kernel/custom.sh
-    # - name: SSH connection to Actions (${{github.event.inputs.ssh}})
-    #   uses: P3TERX/ssh2actions@v1.0.0
-    #   if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
-    # - name: Set Device
-    #   working-directory: /workdir/kernel
-    #   run: |
-    #     make O=out ARCH=$ARCH $DEVICE_FULL
-    # - name: Compile Source
-    #   working-directory: /workdir/kernel
-    #   run: |
-    #     chmod +x ./compile.sh
-    #     bash ./compile.sh
-    #     # ls /workdir/kernel/out/arch/arm64/boot/
-    # - name: Pack Kernel
-    #   working-directory: /workdir
-    #   run: |
-    #     cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/
-    # - name: Upload Kernel directory
-    #   uses: actions/upload-artifact@main
-    #   with:
-    #     working-directory: /workdir/kernel
-    #     name: Nimow_Kernel_${{ env.DEVICE }}_TESTFiles
-    #     path: /workdir/kernel/out/arch/arm64/boot/
-    # - name: Upload Kernel Patcher
-    #   uses: actions/upload-artifact@main
-    #   with:
-    #     working-directory: /workdir
-    #     name: Nimow_Kernel_${{ env.DEVICE }}_Anykernel
-    #     path: /workdir/anykernel/
-    # - name: Delete workflow runs
+    - name: Set Cache
+      working-directory: /workdir/kernel
+      run: |
+        ccache -M 15G
+    - name: Patch KernelSU (${{github.event.inputs.kernelsu}})
+      working-directory: /workdir/kernel
+      if: (github.event.inputs.kernelsu == 'true' && github.event.inputs.kernelsu  != 'false') || contains(github.event.action, 'kernelsu')
+      run: |
+        curl -LSs "https://raw.githubusercontent.com/tiann/KernelSU/main/kernel/setup.sh" | bash -s v0.5.2
+        # sed -i 's/CONFIG_KSU=n/CONFIG_KSU=y/' arch/arm64/configs/lancelot_defconfig
+        cd drivers/kernelsu/
+        ls
+        pwd
+        sed -i 's/extern void ksu_enable_sucompat();/\/\/extern void ksu_enable_sucompat();/g' ksu.c
+        sed -i 's/extern void ksu_enable_ksud();/\/\/extern void ksu_enable_ksud();/g' ksu.c
+        sed -i 's/ksu_enable_sucompat();/\/\/ksu_enable_sucompat();/g' ksu.c
+        sed -i 's/ksu_enable_ksud();/\/\/ksu_enable_ksud();/g' ksu.c
+    - name: Kernel Custom Script (${{github.event.inputs.custom}})
+      working-directory: /workdir
+      if: (github.event.inputs.custom == 'true' && github.event.inputs.custom  != 'false') || contains(github.event.action, 'custom')
+      run: |
+        cp ./extra/custom.sh ./kernel/
+        chmod +x ./kernel/custom.sh
+        bash ./kernel/custom.sh
+    - name: SSH connection to Actions (${{github.event.inputs.ssh}})
+      uses: P3TERX/ssh2actions@v1.0.0
+      if: (github.event.inputs.ssh == 'true' && github.event.inputs.ssh  != 'false') || contains(github.event.action, 'ssh')
+    - name: Set Device
+      working-directory: /workdir/kernel
+      run: |
+        make O=out ARCH=$ARCH $DEVICE_FULL
+    - name: Compile Source
+      working-directory: /workdir/kernel
+      run: |
+        chmod +x ./compile.sh
+        bash ./compile.sh
+        # ls /workdir/kernel/out/arch/arm64/boot/
+    - name: Pack Kernel
+      working-directory: /workdir
+      run: |
+        cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/
+    - name: Upload Kernel directory
+      uses: actions/upload-artifact@main
+      with:
+        working-directory: /workdir/kernel
+        name: Nimow_Kernel_${{ env.DEVICE }}_TESTFiles
+        path: /workdir/kernel/out/arch/arm64/boot/
+    - name: Upload Kernel Patcher
+      uses: actions/upload-artifact@main
+      with:
+        working-directory: /workdir
+        name: Nimow_Kernel_${{ env.DEVICE }}_Anykernel
+        path: /workdir/anykernel/
+    - name: Delete workflow runs
     #   uses: GitRML/delete-workflow-runs@main
     #   with:
     #     retain_days: 1
