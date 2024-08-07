@@ -71,16 +71,18 @@ jobs:
       working-directory: /workdir
       run: |
         df -hT $PWD
-        # git clone $EXTERNAL_URL extra
-        # git clone $ANYKERNEL_URL anykernel
+        git clone $EXTERNAL_URL extra
+        git clone $ANYKERNEL_URL anykernel
         rm -rf ./anykernel/.github && rm -rf ./anykernel/README.md && rm -rf ./anykernel/.git && rm -rf ./anykernel/anykernel.sh
         git clone --recurse-submodules --depth=1 $REPO_URL -b $REPO_BRANCH kernel
         # git clone --depth=1 $TOOLCHAIN_URL -b $TOOLCHAIN_BRANCH toolchain
         # tar --version
-        wget https://github.com/ZyCromerZ/Clang/releases/download/16.0.6-20240430-release/Clang-16.0.6-20240430.tar.gz
-        ls
+        wget https://github.com/ZyCromerZ/Clang/releases/download/16.0.6-20240430-release/Clang-16.0.6-20240430.tar.gz -nv
+        pwd
         # tar xvf *.tar.gz -C toolchain
         tar xvf Clang-16.0.6-20240430.tar.gz -C /workdir
+        ls
+        pwd
         cp ./extra/compile.sh ./kernel/
         cp ./extra/anykernel.sh ./anykernel/
         ln -sf /workdir/kernel $GITHUB_WORKSPACE/kernel
