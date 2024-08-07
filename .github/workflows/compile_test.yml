@@ -31,8 +31,8 @@ env:
   UPLOAD_RELEASE: true
   REPO_URL: https://github.com/Viole403/android_kernel_xiaomi_mt6768.git
   REPO_BRANCH: lineage-20
-  TOOLCHAIN_URL: https://github.com/socaindra/ZyCromerZ-Clang.git
-  TOOLCHAIN_BRANCH: main
+  TOOLCHAIN_URL: https://github.com/ramabondanp/clang.git
+  TOOLCHAIN_BRANCH: master
   CONFIG_FILE: .config
   EXTERNAL_URL: https://github.com/violesec/kernel_build.git
   ANYKERNEL_URL: https://github.com/violesec/anykernel-lance.git
