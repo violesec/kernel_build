@@ -11,6 +11,9 @@ name: Build Kernel (Azure-Clang)
 
 on:
   # repository_dispatch:
+  push:
+  pull_request:
+  repository_dispatch:
   workflow_dispatch:
     inputs:
       ssh:
@@ -120,20 +123,26 @@ jobs:
     #   working-directory: /workdir
     #   run: |
     #     cp /workdir/kernel/out/arch/arm64/boot/Image.gz-dtb ./anykernel/
+    # - name: Upload Kernel directory
+    #   uses: actions/upload-artifact@main
+    #   with:
+    #     working-directory: /workdir/kernel
+    #     name: Nimow_Kernel_${{ env.DEVICE }}_TESTFiles
+    #     path: /workdir/kernel/out/arch/arm64/boot/
     - name: Upload Kernel directory
       uses: actions/upload-artifact@main
       with:
         working-directory: /workdir/kernel
         name: Nimow_Kernel_${{ env.DEVICE }}_TESTFiles
-        path: /workdir/kernel/out/arch/arm64/boot/
+        path: /workdir/kernel/out/
     # - name: Upload Kernel Patcher
     #   uses: actions/upload-artifact@main
     #   with:
     #     working-directory: /workdir
     #     name: Nimow_Kernel_${{ env.DEVICE }}_Anykernel
     #     path: /workdir/anykernel/
-    - name: Delete workflow runs
-      uses: GitRML/delete-workflow-runs@main
-      with:
-        retain_days: 1
-        keep_minimum_runs: 3
+    # - name: Delete workflow runs
+    #   uses: GitRML/delete-workflow-runs@main
+    #   with:
+    #     retain_days: 1
+    #     keep_minimum_runs: 3
